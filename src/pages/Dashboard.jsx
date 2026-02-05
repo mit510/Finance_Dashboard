@@ -4,10 +4,10 @@ import TransactionList from "../components/TransactionList";
 import Analytics from "./Analytics";
 import Settings from "./Settings";
 import { logout } from "../services/auth";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
   PiggyBank,
   LogOut,
   Menu,
@@ -63,7 +63,7 @@ export default function Dashboard({
   const prevMonthTransactions = useMemo(() => {
     const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
     const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
-    
+
     return transactions.filter((t) => {
       if (!t.transactionDate) return false;
       const d = t.transactionDate.toDate?.() || new Date(t.transactionDate);
@@ -129,27 +129,27 @@ export default function Dashboard({
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
-            <NavItem 
-              icon={Home} 
-              label="Dashboard" 
+            <NavItem
+              icon={Home}
+              label="Dashboard"
               active={currentPage === 'dashboard'}
               onClick={() => {
                 setCurrentPage('dashboard');
                 setSidebarOpen(false);
               }}
             />
-            <NavItem 
-              icon={BarChart3} 
-              label="Analytics" 
+            <NavItem
+              icon={BarChart3}
+              label="Analytics"
               active={currentPage === 'analytics'}
               onClick={() => {
                 setCurrentPage('analytics');
                 setSidebarOpen(false);
               }}
             />
-            <NavItem 
-              icon={SettingsIcon} 
-              label="Settings" 
+            <NavItem
+              icon={SettingsIcon}
+              label="Settings"
               active={currentPage === 'settings'}
               onClick={() => {
                 setCurrentPage('settings');
@@ -184,7 +184,7 @@ export default function Dashboard({
 
       {/* Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -257,25 +257,27 @@ export default function Dashboard({
 
               {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <StatCard 
-                  title="Total Income" 
-                  value={income} 
+                <StatCard
+                  title="Total Income"
+                  value={income}
                   icon={TrendingUp}
                   trend={incomeTrend}
-                  color="success" 
+                  color="green"
                 />
-                <StatCard 
-                  title="Total Expenses" 
+
+                <StatCard
+                  title="Total Expenses"
                   value={expenses}
                   icon={TrendingDown}
                   trend={expenseTrend}
-                  color="danger" 
+                  color="red"
                 />
-                <StatCard 
-                  title="Net Savings" 
+
+                <StatCard
+                  title="Net Savings"
                   value={savings}
                   icon={PiggyBank}
-                  color={savings >= 0 ? "success" : "danger"}
+                  color={savings >= 0 ? "green" : "red"}
                 />
               </div>
 
@@ -320,8 +322,8 @@ function NavItem({ icon: Icon, label, active = false, onClick }) {
       className={`
         w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium
         transition-all duration-200
-        ${active 
-          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 shadow-sm' 
+        ${active
+          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 shadow-sm'
           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700'
         }
       `}
@@ -335,25 +337,26 @@ function NavItem({ icon: Icon, label, active = false, onClick }) {
 // Enhanced Stat Card Component
 function StatCard({ title, value, icon: Icon, trend, color }) {
   const colors = {
-    success: {
-      bg: "from-success-50 to-success-100/50 dark:from-success-900/20 dark:to-success-800/10",
-      text: "text-success-700 dark:text-success-400",
-      icon: "bg-success-500",
-      shadow: "shadow-success-500/20",
-    },
-    danger: {
-      bg: "from-danger-50 to-danger-100/50 dark:from-danger-900/20 dark:to-danger-800/10",
-      text: "text-danger-700 dark:text-danger-400",
-      icon: "bg-danger-500",
-      shadow: "shadow-danger-500/20",
-    },
-    primary: {
-      bg: "from-primary-50 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-800/10",
-      text: "text-primary-700 dark:text-primary-400",
-      icon: "bg-primary-500",
-      shadow: "shadow-primary-500/20",
-    },
-  };
+  green: {
+    bg: "from-green-50 to-green-100/60",
+    text: "text-green-700",
+    icon: "bg-green-500",
+    shadow: "shadow-green-500/30",
+  },
+  red: {
+    bg: "from-red-50 to-red-100/60",
+    text: "text-red-700",
+    icon: "bg-red-500",
+    shadow: "shadow-red-500/30",
+  },
+  blue: {
+    bg: "from-blue-50 to-blue-100/60",
+    text: "text-blue-700",
+    icon: "bg-blue-500",
+    shadow: "shadow-blue-500/30",
+  },
+};
+
 
   const colorScheme = colors[color] || colors.primary;
   const isPositive = trend >= 0;
@@ -378,7 +381,7 @@ function StatCard({ title, value, icon: Icon, trend, color }) {
           <Icon className="w-6 h-6 text-white" />
         </div>
       </div>
-      
+
       {trend !== undefined && (
         <div className={`
           flex items-center gap-1 text-sm font-medium

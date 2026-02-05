@@ -2,39 +2,45 @@ import { useState } from "react";
 import { deleteTransaction, updateTransaction } from "../services/transactionService";
 import { Timestamp } from "firebase/firestore";
 import { Edit2, Trash2, Save, X, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import ModernDatePicker from "./ModernDatePicker";
 
 export default function TransactionList({ transactions, refresh }) {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
   const [deletingId, setDeletingId] = useState(null);
+  const [date, setDate] = useState(null);
 
   const startEdit = (t) => {
     setEditingId(t.id);
 
-    const date = t.transactionDate?.toDate
-      ? t.transactionDate.toDate().toISOString().split("T")[0]
-      : "";
+    const jsDate = t.transactionDate?.toDate
+      ? t.transactionDate.toDate()
+      : new Date();
+
+    setDate(jsDate);
 
     setEditData({
       amount: t.amount,
       category: t.category,
       type: t.type,
       note: t.note || "",
-      transactionDate: date
+      transactionDate: jsDate
     });
   };
+
 
   const saveEdit = async (id) => {
     await updateTransaction(id, {
       ...editData,
       transactionDate: Timestamp.fromDate(
-        new Date(editData.transactionDate)
+        editData.transactionDate
       )
     });
 
     setEditingId(null);
     refresh();
   };
+
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -47,7 +53,7 @@ export default function TransactionList({ transactions, refresh }) {
   const groupedTransactions = transactions.reduce((groups, transaction) => {
     const date = transaction.transactionDate?.toDate?.() || new Date();
     const dateKey = date.toDateString();
-    
+
     if (!groups[dateKey]) {
       groups[dateKey] = [];
     }
@@ -92,9 +98,9 @@ export default function TransactionList({ transactions, refresh }) {
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-1 h-px bg-neutral-200"></div>
                   <span className="text-sm font-medium text-neutral-500 px-3">
-                    {new Date(dateKey).toLocaleDateString('en-US', { 
+                    {new Date(dateKey).toLocaleDateString('en-US', {
                       weekday: 'short',
-                      month: 'short', 
+                      month: 'short',
                       day: 'numeric',
                       year: 'numeric'
                     })}
@@ -105,12 +111,12 @@ export default function TransactionList({ transactions, refresh }) {
                 {/* Transactions for this date */}
                 <div className="space-y-2">
                   {dayTransactions.map((t) => (
-                    <div 
-                      key={t.id} 
+                    <div
+                      key={t.id}
                       className={`
                         rounded-xl border transition-all duration-200
-                        ${deletingId === t.id 
-                          ? 'opacity-50 scale-95' 
+                        ${deletingId === t.id
+                          ? 'opacity-50 scale-95'
                           : 'hover:shadow-md'
                         }
                         ${editingId === t.id
@@ -136,19 +142,20 @@ export default function TransactionList({ transactions, refresh }) {
                                        transition-all outline-none"
                             />
 
-                            <input
-                              type="date"
-                              value={editData.transactionDate}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  transactionDate: e.target.value
-                                })
-                              }
-                              className="px-4 py-2 border border-neutral-300 rounded-lg 
-                                       focus:ring-2 focus:ring-primary-200 focus:border-primary-500 
-                                       transition-all outline-none"
-                            />
+                            {/* Modern Date Picker */}
+                            <div className="md:col-span-1">
+                              <ModernDatePicker
+                                value={date}
+                                onChange={(newDate) => {
+                                  setDate(newDate);
+                                  setEditData({
+                                    ...editData,
+                                    transactionDate: newDate
+                                  });
+                                }}
+                                label="Date"
+                              />
+                            </div>
 
                             <input
                               type="text"
@@ -218,8 +225,8 @@ export default function TransactionList({ transactions, refresh }) {
                             {/* Icon */}
                             <div className={`
                               w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-                              ${t.type === "income" 
-                                ? 'bg-success-100 text-success-600' 
+                              ${t.type === "income"
+                                ? 'bg-success-100 text-success-600'
                                 : 'bg-danger-100 text-danger-600'
                               }
                             `}>
@@ -238,8 +245,8 @@ export default function TransactionList({ transactions, refresh }) {
                                 </p>
                                 <span className={`
                                   px-2 py-0.5 text-xs font-medium rounded-full
-                                  ${t.type === "income" 
-                                    ? 'bg-success-100 text-success-700' 
+                                  ${t.type === "income"
+                                    ? 'bg-success-100 text-success-700'
                                     : 'bg-danger-100 text-danger-700'
                                   }
                                 `}>
@@ -260,8 +267,8 @@ export default function TransactionList({ transactions, refresh }) {
                             <div className="text-right">
                               <p className={`
                                 text-lg font-bold
-                                ${t.type === "income" 
-                                  ? 'text-success-600' 
+                                ${t.type === "income"
+                                  ? 'text-success-600'
                                   : 'text-danger-600'
                                 }
                               `}>

@@ -11,11 +11,12 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   // 🔄 Fetch transactions
-  const refreshTransactions = useCallback(async (uid) => {
-    if (!uid) return;
-    const data = await getTransactions(uid);
-    setTransactions(data);
-  }, []);
+  const refreshTransactions = useCallback(async () => {
+    if (user?.uid) {
+      const data = await getTransactions(user.uid);
+      setTransactions(data);
+    }
+  }, [user]);
 
   // 🔐 Auth listener
   useEffect(() => {
@@ -24,14 +25,15 @@ function App() {
       setLoading(false);
 
       if (u) {
-        await refreshTransactions(u.uid);
+        const data = await getTransactions(u.uid);
+        setTransactions(data);
       } else {
         setTransactions([]);
       }
     });
 
     return () => unsubscribe();
-  }, [refreshTransactions]);
+  }, []);
 
   // 💰 Calculations (safe numbers)
   const income = transactions
