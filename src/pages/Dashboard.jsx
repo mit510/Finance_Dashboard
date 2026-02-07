@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import AddTransaction from "../components/AddTransaction";
+import AddTransactionWithTax from "../components/AddTransactionWithTax";
 import TransactionList from "../components/TransactionList";
+import IncomeTaxPieChart from "../components/IncomeTaxPieChart";
 import Analytics from "./Analytics";
 import Settings from "./Settings";
 import { logout } from "../services/auth";
@@ -209,10 +210,9 @@ export default function Dashboard({
                   </div>
                 </div>
               </div>
-
-              {/* Add Transaction */}
+{/* Add Transaction */}
               <div className="mb-8">
-                <AddTransaction user={user} onAdd={refreshTransactions} />
+                <AddTransactionWithTax user={user} onAdd={refreshTransactions} />
               </div>
 
               {/* Filters - MOVED HERE */}
@@ -255,7 +255,7 @@ export default function Dashboard({
                 </select>
               </div>
 
-              {/* Stats */}
+             {/* Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <StatCard
                   title="Total Income"
@@ -280,6 +280,13 @@ export default function Dashboard({
                   color={savings >= 0 ? "green" : "red"}
                 />
               </div>
+
+              {/* Income vs Tax Pie Chart */}
+              <div className="mb-10">
+                <IncomeTaxPieChart transactions={transactions} />
+              </div>
+
+              {/* Modern Charts */}
 
               {/* Modern Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
