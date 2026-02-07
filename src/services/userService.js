@@ -1,19 +1,24 @@
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage, auth } from "./firebase";
+import { db, auth } from "./firebase";
 
+/**
+ * Save a new user to Firestore
+ */
 export const saveuser = async (user) => {
   await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     name: user.displayName,
     email: user.email,
-    photoURL: user.photoURL,
+    photoURL: user.photoURL || null,
     createdAt: new Date()
   });
 };
 
-// Update user display name
+/**
+ * Update user display name
+ * This will CREATE the document if it doesn't exist, or UPDATE if it does
+ */
 export const updateUserDisplayName = async (userId, displayName) => {
   try {
     // Update Firebase Auth profile
@@ -24,12 +29,27 @@ export const updateUserDisplayName = async (userId, displayName) => {
       });
     }
 
-    // Update Firestore document
+    // Check if user document exists
     const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      name: displayName,
-      updatedAt: new Date()
-    });
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      // Document exists - UPDATE it
+      await updateDoc(userRef, {
+        name: displayName,
+        updatedAt: new Date()
+      });
+    } else {
+      // Document doesn't exist - CREATE it
+      await setDoc(userRef, {
+        uid: userId,
+        name: displayName,
+        email: currentUser?.email || '',
+        photoURL: currentUser?.photoURL || null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
 
     return { success: true };
   } catch (error) {
@@ -38,36 +58,26 @@ export const updateUserDisplayName = async (userId, displayName) => {
   }
 };
 
-// Upload profile picture
-export const uploadProfilePicture = async (userId, file) => {
+/**
+ * Upload profile picture - DISABLED
+ * This function is kept for compatibility but does nothing
+ */
+
+/**
+ * Get user data from Firestore
+ */
+export const getUserData = async (userId) => {
   try {
-    // Create a storage reference
-    const storageRef = ref(storage, `profile-pictures/${userId}`);
-    
-    // Upload the file
-    const snapshot = await uploadBytes(storageRef, file);
-    
-    // Get the download URL
-    const photoURL = await getDownloadURL(snapshot.ref);
-    
-    // Update Firebase Auth profile
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      await updateProfile(currentUser, {
-        photoURL: photoURL
-      });
-    }
-
-    // Update Firestore document
     const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      photoURL: photoURL,
-      updatedAt: new Date()
-    });
-
-    return { success: true, photoURL };
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      return userSnap.data();
+    } else {
+      throw new Error("User not found");
+    }
   } catch (error) {
-    console.error("Error uploading profile picture:", error);
+    console.error("Error getting user data:", error);
     throw error;
   }
 };
